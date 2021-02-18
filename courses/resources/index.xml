@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Overview | Applied Research and Data Analysis</title>
-    <link>/courses/resources/</link>
-      <atom:link href="/courses/resources/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://dcosme.github.io/pltv-seminar/courses/resources/</link>
+      <atom:link href="https://dcosme.github.io/pltv-seminar/courses/resources/index.xml" rel="self" type="application/rss+xml" />
     <description>Overview</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 09 Sep 2018 00:00:00 +0000</lastBuildDate>
     <image>
       <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
       <title>Overview</title>
-      <link>/courses/resources/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/</link>
     </image>
     
     <item>
       <title>Useful books</title>
-      <link>/courses/resources/books/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/books/</link>
       <pubDate>Sun, 05 May 2019 00:00:00 +0100</pubDate>
-      <guid>/courses/resources/books/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/courses/resources/books/</guid>
       <description>&lt;br&gt;
 &lt;h2 id=&#34;visualization&#34;&gt;Visualization&lt;/h2&gt;
 &lt;ul&gt;
@@ -87,9 +87,9 @@
     
     <item>
       <title>Useful readings</title>
-      <link>/courses/resources/readings/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/readings/</link>
       <pubDate>Sun, 05 May 2019 00:00:00 +0100</pubDate>
-      <guid>/courses/resources/readings/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/courses/resources/readings/</guid>
       <description>&lt;br&gt;
 &lt;h2 id=&#34;papers&#34;&gt;Papers&lt;/h2&gt;
 &lt;ol&gt;
@@ -174,9 +174,9 @@
     
     <item>
       <title>Useful websites</title>
-      <link>/courses/resources/websites/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/websites/</link>
       <pubDate>Sun, 05 May 2019 00:00:00 +0100</pubDate>
-      <guid>/courses/resources/websites/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/courses/resources/websites/</guid>
       <description>&lt;br&gt;
 &lt;ul&gt;
 &lt;li&gt;

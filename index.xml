@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Applied Research and Data Analysis</title>
-    <link>/</link>
-      <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://dcosme.github.io/pltv-seminar/</link>
+      <atom:link href="https://dcosme.github.io/pltv-seminar/index.xml" rel="self" type="application/rss+xml" />
     <description>Applied Research and Data Analysis</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 05 May 2019 00:00:00 +0100</lastBuildDate>
     <image>
       <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
       <title>Applied Research and Data Analysis</title>
-      <link>/</link>
+      <link>https://dcosme.github.io/pltv-seminar/</link>
     </image>
     
     <item>
       <title>Useful books</title>
-      <link>/courses/resources/books/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/books/</link>
       <pubDate>Sun, 05 May 2019 00:00:00 +0100</pubDate>
-      <guid>/courses/resources/books/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/courses/resources/books/</guid>
       <description>&lt;br&gt;
 &lt;h2 id=&#34;visualization&#34;&gt;Visualization&lt;/h2&gt;
 &lt;ul&gt;
@@ -87,9 +87,9 @@
     
     <item>
       <title>Useful readings</title>
-      <link>/courses/resources/readings/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/readings/</link>
       <pubDate>Sun, 05 May 2019 00:00:00 +0100</pubDate>
-      <guid>/courses/resources/readings/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/courses/resources/readings/</guid>
       <description>&lt;br&gt;
 &lt;h2 id=&#34;papers&#34;&gt;Papers&lt;/h2&gt;
 &lt;ol&gt;
@@ -174,9 +174,9 @@
     
     <item>
       <title>Useful websites</title>
-      <link>/courses/resources/websites/</link>
+      <link>https://dcosme.github.io/pltv-seminar/courses/resources/websites/</link>
       <pubDate>Sun, 05 May 2019 00:00:00 +0100</pubDate>
-      <guid>/courses/resources/websites/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/courses/resources/websites/</guid>
       <description>&lt;br&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -270,11 +270,11 @@
     
     <item>
       <title>Prework</title>
-      <link>/prework/</link>
+      <link>https://dcosme.github.io/pltv-seminar/prework/</link>
       <pubDate>Fri, 11 Sep 2020 11:17:19 -0700</pubDate>
-      <guid>/prework/</guid>
+      <guid>https://dcosme.github.io/pltv-seminar/prework/</guid>
       <description>
-&lt;script src=&#34;/prework/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://dcosme.github.io/pltv-seminar/prework/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
 
 
 &lt;p&gt;Welcome to the PLTV Applied Research and Data Analysis Pro-Seminar!&lt;/p&gt;
@@ -283,7 +283,7 @@
 &lt;li&gt;&lt;p&gt;Join the &lt;a href=&#34;https://pennleadsthevote.slack.com/&#34;&gt;#data-bootcamp Slack channel&lt;/a&gt;. This will be our primary means for communication throughout the semester. If you haven’t received an invitation or are having trouble accessing/using Slack, please let me know asap so we can figure out a solution that works for you. Email me at &lt;a href=&#34;mailto:danielle.cosme@asc.upenn.edu&#34;&gt;danielle.cosme@asc.upenn.edu&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Complete the ethics training through &lt;a href=&#34;https://drive.google.com/file/d/1BbrWBvWuYtSF0EN6i8VFMTYjUmQdLPFi/view&#34;&gt;Collaborative Institutional Training Initiative (CITI)&lt;/a&gt; and send me your CITI certificate when you’ve completed it. This will enable me to add you to the Communication Neuroscience IRB and share relevant data with you.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Download &lt;a href=&#34;https://cran.r-project.org/&#34;&gt;R&lt;/a&gt; and &lt;a href=&#34;https://rstudio.com/products/rstudio/download/&#34;&gt;RStudio&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Review the &lt;a href=&#34;/#syllabus&#34;&gt;Syllabus&lt;/a&gt; and review the &lt;a href=&#34;/#code_of_conduct&#34;&gt;Code of Conduct&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Review the &lt;a href=&#34;https://dcosme.github.io/pltv-seminar/#syllabus&#34;&gt;Syllabus&lt;/a&gt; and review the &lt;a href=&#34;https://dcosme.github.io/pltv-seminar/#code_of_conduct&#34;&gt;Code of Conduct&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;p&gt;To help you get acquainted to R and RStudio, please complete the following modules from the &lt;a href=&#34;https://uopsych-r-bootcamp-2020.netlify.app/&#34;&gt;University of Oregon R Bootcamp Course&lt;/a&gt;.&lt;/p&gt;

@@ -2,14 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Applied Research and Data Analysis</title>
-    <link>/authors/dani/</link>
-      <atom:link href="/authors/dani/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://dcosme.github.io/pltv-seminar/authors/dani/</link>
+      <atom:link href="https://dcosme.github.io/pltv-seminar/authors/dani/index.xml" rel="self" type="application/rss+xml" />
     <description>Applied Research and Data Analysis</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language>
     <image>
       <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
       <title>Applied Research and Data Analysis</title>
-      <link>/authors/dani/</link>
+      <link>https://dcosme.github.io/pltv-seminar/authors/dani/</link>
     </image>
     
   </channel>
