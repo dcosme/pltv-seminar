@@ -1,0 +1,319 @@
+---
+title: "Week 3"
+subtitle: "Survey design"
+author: "Dani Cosme"
+output:
+  xaringan::moon_reader:
+    css: ["default", "css/dcos.css", "css/dcos-fonts.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: atelier-lakeside-light
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+  comment = NA, dpi = 300,
+  fig.align = "center", out.width = "80%", cache = FALSE)
+
+if(!require('tidyverse')) {
+	install.packages('tidyverse')
+}
+if(!require('devtools')) {
+	install.packages('devtools') 
+}
+if(!require('emo')) {
+	devtools::install_github("hadley/emo")
+}
+if(!require('xaringanExtra')) {
+	devtools::install_github("gadenbuie/xaringanExtra")
+}
+if(!require('countdown')) {
+	devtools::install_github("gadenbuie/countdown")
+}
+```
+
+## Check-in
+
+### Assignment
+
+* Emphasize social norms and Penn identity
+--
+
+* Draft is [here](https://docs.google.com/document/d/14jWABXCFx-ydFAtiAWmlEZFJdpu6RtDPnvWlaTJAn3s/edit?usp=sharing)
+
+--
+
+* Plan
+
+--
+
+  * Finish creating the draft (by Monday March 22)
+
+--
+
+  * Give feedback, keeping [your critiques](https://jamboard.google.com/d/1iASnxsICB9oHyaCSPYAGAxukEeMkdV-TEeNUnO37l1g/edit?usp=sharing) of the fall emails in mind (by Friday March 26)
+
+--
+  
+  * Randomize emails to the experimental or control condition and send (April 19)
+
+---
+
+## Check-in
+
+### Prework
+
+  `r emo::ji("check")` Complete CITI certificate (deadline Monday March 22)
+  
+  `r emo::ji("check")` Download [R](https://cran.r-project.org/) and [RStudio](https://rstudio.com/products/rstudio/download/)
+  
+  `r emo::ji("check")` Complete [R Bootcamp modules](https://dcosme.github.io/pltv-seminar/prework/) (by March 26) & post questions to Slack
+
+---
+class: center, middle
+
+## Goal for this week
+
+Collectively design a survey<br><br>
+
+---
+## Common issues / sources of bias
+### Questions
+
+--
+
+* <b>Leading</b> questions
+
+--
+
+  * How much do you love being in this seminar?
+
+--
+
+* <b>Loaded</b> questions
+
+--
+
+  * How much did you like drafting the message framing text?
+
+--
+
+* <b>Double-barreled</b> questions
+
+--
+
+  * How excited are you to draft and give feedback on the survey?
+
+--
+
+* <b>Social desirability</b>
+
+--
+
+  * How good is Dani at teaching?
+
+---
+## Common issues / sources of bias
+### Responses
+
+--
+
+* Missing options
+
+--
+
+  * How much do you love being in this seminar?
+  
+  * Completely love / Completely hate
+
+--
+
+* Incorrect scale anchors
+
+--
+
+  * How much do you love being in this seminar?
+  
+  * Strongly disagree --> Agree
+
+---
+## Critique
+
+```{r, echo = FALSE}
+countdown::countdown(minutes = 5, seconds = 00, font_size = "2em")
+```
+
+Let's critique [this survey](https://action.donaldjtrump.com/post-2020-rnc-approval-poll) and identify sources of bias. 
+
+Use [this doc](https://docs.google.com/document/d/1IWz8yMpfE1-THtswQhQvcxxBUbIKDgwJDMId2u8yks4/edit?usp=sharing) to annotate the survey items together.
+
+
+---
+## PLTV survey components
+
+--
+
+* Description of the survey, consent, compensation
+
+--
+
+* Screening
+
+--
+
+* Message framing experiment
+  * Within- versus between-person design
+  * Manipulation checks
+  * Issues related to power
+
+--
+
+* Dependent variables
+  * Depends on design
+
+--
+
+* Moderator / individual difference measures
+
+--
+
+* Open-ended questions
+
+--
+
+* Student status and demographics
+
+--
+
+* Debrief
+
+
+---
+## Brainstorming
+
+```{r xaringan-editable, echo=FALSE}
+xaringanExtra::use_editable(expires = 1)
+```
+
+### Experimental manipulation
+
+.can-edit.key-likes[
+- Messages content
+  - 
+  
+- Message framing
+  - 
+  
+]
+
+---
+## Brainstorming
+
+```{r xaringan-editable2, echo=FALSE}
+xaringanExtra::use_editable(expires = 1)
+```
+
+### Dependent variables
+
+.can-edit.key-likes[
+- Message-level
+  - Relevance, motivation, sharing, manipulation checks
+  
+- Person-level
+  - Social norms, Penn identity strength
+  - Voting attitudes, intentions
+  
+]
+
+---
+## Brainstorming
+
+```{r xaringan-editable3, echo=FALSE}
+xaringanExtra::use_editable(expires = 1)
+```
+
+### Individual difference measures
+
+.can-edit.key-likes[
+- Motivation, civic engagement attitudes, political efficacy
+
+]
+
+---
+## Brainstorming
+
+```{r xaringan-editable4, echo=FALSE}
+xaringanExtra::use_editable(expires = 1)
+```
+
+### Other measures
+
+.can-edit.key-likes[
+- Reasons for voting/not voting
+- Open-ended: Advantages/disadvantages/barriers/solutions to voting
+
+]
+
+---
+## Design considerations
+
+--
+
+* Survey flow / order of measures
+
+--
+
+* Display logic
+
+--
+
+* Randomization (items and measures)
+
+--
+
+* Forced or requested responses
+
+--
+
+* Page breaks
+
+--
+
+* Embedded data and unique links
+
+--
+
+* Item names
+
+--
+
+* Automatically generated values
+
+--
+
+* Analysis plan
+
+
+---
+## Assignment
+Design a survey based on our research question.
+
+--
+
+1. Form drafting and feedback teams
+
+--
+
+2. Drafting team: Create stimuli for the experimental component and modify the survey by **March 26**
+
+--
+
+3. Feedback team: Provide feedback on the drafting team's survey [in this doc](https://docs.google.com/document/d/1H1_B-Mrr-GyrhbHOlvRScAX0RNsa0T_9eG7xxSwVYug/edit?usp=sharing) by **March 31**
+
+--
+
+4. Determine sampling plan, make changes, and launch survey **April 2**
+
