@@ -1,0 +1,406 @@
+---
+title: "Week 4: Data wrangling & tidying"
+author: "Dani Cosme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    highlight: tango
+    theme: united
+    toc: true
+    toc_float: 
+      collapsed: TRUE
+      smooth_scroll: TRUE
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.path = "figs/week4/")
+
+options(scipen = 999)
+```
+
+
+# resources
+
+Here are a number of helpful resources to dig deeper into data wrangling and tidying using `tidyverse` packages:
+
+**UO Bootcamp modules**
+
+* [Introduction to the Tidyverse](https://uopsych-r-bootcamp-2020.netlify.app/post/04-intro-tidyverse/)
+* [Importing Data & Project-oriented Workflows](https://uopsych-r-bootcamp-2020.netlify.app/post/05-importing-workflows/)
+* [Data Wranging With {dplyr}](https://uopsych-r-bootcamp-2020.netlify.app/post/07-dplyr/)
+* [Data Wranging With {tidyr}](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+**Cheat sheets**
+
+* [Data transformation with dplyr](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+* [Data tidying tidyr/readr](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+* [More useful cheat sheets!](https://www.rstudio.com/resources/cheatsheets/)
+
+# load packages
+```{r}
+if (!require(pacman)) {
+  install.packages('pacman')
+}
+pacman::p_load("tidyverse", "here", install = TRUE)
+```
+
+# load the data file
+
+First, check your current working directory
+
+```{r}
+here()
+```
+
+Modify the path as needed to where your `week4_data.csv` file is downloaded. Note, my path is a little different, but for you, it should be in the `data/` directory in the same folder as this script.
+
+Import the csv file and assign it to the variable `data`
+
+```{r}
+data = read_csv(here("static", "labs", "data", "week4_data.csv"))
+```
+
+# check the data file
+
+Check the names of the variables using `names()`
+
+```{r}
+names(data)
+```
+
+Check the data types using `glimpse()`
+
+```{r}
+glimpse(data)
+```
+
+Check the number of rows and columns using `nrow()` and `ncol()`
+
+```{r}
+nrow(data)
+ncol(data)
+```
+
+Check the first 10 rows using `head()`
+
+```{r}
+head(data, n = 10)
+```
+
+View the dataframe using `View()`
+
+```{r, eval = FALSE}
+View(data)
+```
+
+# rename columns
+Rename the following columns using `rename()`:
+
+* ``pol_expr&contcreat_1`` -->  `political_expression_1`
+* ``pol_expr&contcreat_2`` -->  `political_expression_3`
+* ``pol_expr&contcreat_2`` -->  `political_expression_3`
+
+The `%>%` operator is called a pipe. You can think of it as meaning "and then". So, we're going to take the `data` variable **and then** rename three columns
+
+```{r}
+# rename variables
+data_renamed = data %>%
+  rename("political_expression_1" = `pol_expr&contcreat_1`,
+         "political_expression_2" = `pol_expr&contcreat_2`,
+         "political_expression_3" = `pol_expr&contcreat_3`)
+
+# check the names
+names(data_renamed)
+
+# select only names that start with "political" using the grepl() function 
+# grepl() uses regular expressions to match patterns
+
+names(data_renamed)[grepl("political", names(data_renamed))]
+```
+
+# filter out responses
+
+Filter out the following responses using `filter()`:
+
+* Remove test responses (`DistributionChannel == "preview"`)
+* Incomplete responses (`Finished == 0`)
+* Participants who didn't consent (`consent == 0`)
+
+```{r}
+# filter
+data_filtered = data_renamed %>%
+  filter(!DistributionChannel == "preview") %>%
+  filter(Finished == 1 & consent == 1)
+
+# check the number of rows
+nrow(data_filtered)
+```
+
+# recode responses
+The variable `CE_voting` had a response option outside of the 1-4 scale range, and this was coded as `99` to flag people who were not eligible to vote in previous election.
+
+We want to recode that as missing data using `NA`.
+
+Let's do this using `mutate()`, `ifelse()` and `recode`()`.
+
+`ifelse()` is a logical statement that means "if test is true, do X; otherwise (i.e. if test is false) do Y"
+
+```{r}
+# check unique response values
+unique(data_filtered$CE_voting)
+
+# recode
+data_recoded = data_filtered %>%
+  mutate(CE_voting = ifelse(test = CE_voting == 99,
+                            yes = NA, 
+                            no = CE_voting))
+
+# check unique response values again
+unique(data_recoded$CE_voting)
+```
+
+# select a subset of columns
+Select the following columns using `select()`, and `contains()` and `starts_with()` to match patterns of the column names:
+
+* `ResponseId`
+* `behavior_voting`
+* all columns that start with `CE_attitudes`
+* all columns that contain `checklist`
+
+```{r}
+data_select = data_recoded %>%
+  select(ResponseId, behavior_voting, starts_with("CE_attitudes"), contains("checklist"))
+
+data_select
+```
+
+# convert from wide to long format
+
+To more easily wrangle the data for multiple columns at once, we're going to convert from the wide to the long format using `pivot_longer()`.
+
+![](https://uopsych-r-bootcamp-2020.netlify.app/slides/images/tidyr-longer-wider-modified.gif)
+
+Do this for all variables except `ResponseId` and `behavior_voting` by specifying these columns with the `cols = ` argument.
+
+Let's also rename the `name` column (the default) to `scale_name` using `names_to = "scale_name"`.
+
+```{r}
+data_long = data_select %>%
+  pivot_longer(cols = -c(ResponseId, behavior_voting), names_to = "scale_name")
+
+data_long
+```
+
+# extract item number from scale name
+
+`scale_name` contains both the names of the scale (`CE_attitudes` or `CE_checklist`) as well as the item number.
+
+Let's use `extract()` to separate these components into two separate columns called `scale_name` and `item`.
+
+The `col =` argument specifies the original column name, the `into =` argument is where we specify the names of the columns we want to create, and `regex = ` specifies the regular expression pattern.
+
+Regular expressions are SUPER helpful for wrangling and tidying. Learn more about them with [this cheat sheet](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf).
+
+
+```{r}
+data_scale = data_long %>%
+  # extract the item number from scale
+  extract(col = "scale_name", into = c("scale_name", "item"), regex = "(.*)_([0-9]+)") %>%
+  # reorder variables using `select()`
+  select(ResponseId, behavior_voting, scale_name, item, value)
+
+data_scale
+```
+
+# convert response values to numeric
+
+Currently the responses in `value` are character strings. To use them as numbers, we need to convert the column to numeric values using `mutate()` and `as.numeric()`.
+
+```{r}
+# check variable type
+typeof(data_scale$value)
+
+# convert to numeric
+data_numeric = data_scale %>%
+  mutate(value = as.numeric(value))
+
+# check variable type
+typeof(data_numeric$value)
+```
+
+
+# reverse score variables
+Let's say `CE_attitudes_1` is a reverse-scored item, so we want to flip the scale so it matches the other items. The scale ranges from 1 to 7, we'll convert e.g. 1-->7 to 7-->1
+
+We can do this using `mutate()` and `ifelse()`.
+
+```{r}
+# check range
+range(data_select$CE_attitudes_1)
+
+data_rev = data_numeric %>%
+  mutate(value = ifelse(test = scale_name == "CE_attitudes" & item == 1,
+                        yes = 8 - value, # subtract the value from scale max + 1
+                        no = value))
+
+data_rev
+```
+
+
+# recode yes/no variables
+`CE_checklist` is a series of yes/no questions that are currently coded as 1/2. We want to recode these to be 1/0 to make it easier to sum later on.
+
+We'll also recode `voting_behavior` from 1/2 to yes/no to make it clearer what these responses mean. Let's try doing this using `recode()` instead of `ifelse()`.
+
+```{r}
+data_yn = data_rev %>%
+  mutate(value = ifelse(test = scale_name == "CE_checklist" & value == 2,
+                        yes = 0,
+                        no = value),
+         behavior_voting = recode(behavior_voting,
+                                  "1" = "yes",
+                                  "2" = "no"))
+
+data_yn
+```
+
+# summarize {.tabset}
+Now that we've wrangled and tidyied our data, we can summarize it using `summarize()`.
+
+## calculate mean civic engagement attitude across people
+
+Because we just want to look at attitudes, we'll first subset these items using `filter()`.
+
+Then, using `group_by()` we'll state that we want to calculate a mean across all items in the filtered `scale_name` column.
+
+To calculate the mean of `value`, we'll use `summarize()` and `mean()`. Because we want to ignore any missing data (specified as `NA` in the dataframe), we'll also use the `na.rm = TRUE` argument in the `mean()` function.
+
+```{r}
+data_yn %>% 
+  filter(scale_name == "CE_attitudes") %>%
+  group_by(scale_name) %>%
+  summarize(mean = mean(value, na.rm = TRUE))
+
+# this is what would happen if we didn't first filter out `CE_checklist`
+data_yn %>% 
+  #filter(scale_name == "CE_attitudes") %>%
+  group_by(scale_name) %>%
+  summarize(mean = mean(value, na.rm = TRUE))
+```
+
+## calculate mean and SD civic engagement attitude by voting behavior
+
+This time, let's use `group_by()` to calculate means and standard deviations of the civic engagement attitudes separately for people who voted and didn't vote, specified in `behavior_voting`.
+
+```{r}
+data_yn %>% 
+  filter(scale_name == "CE_attitudes") %>%
+  group_by(scale_name, behavior_voting) %>%
+  summarize(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE))
+```
+
+## calculate means and sums per person
+
+This time, let's calculate these stats for each person separately rather than across all data points using `ResponseId` as a grouping factor.
+
+```{r}
+data_yn %>% 
+  group_by(ResponseId, scale_name) %>%
+  summarize(mean = mean(value, na.rm = TRUE),
+            sum = sum(value, na.rm = TRUE))
+```
+
+# assignment
+Now it's your turn to apply what you've learned.
+
+## select
+Select the following subset of columns from `data_recoded`:
+
+* `ResponseId`
+* `vote_registered`
+* variables that contain `behavior`
+* variables that start with `attitude` but not those that start with `CE_attitudes`
+
+Assign this to `assignment_data`
+
+```{r}
+assignment_data = data_recoded %>%
+  select()
+```
+
+## convert to long format
+
+Assign this to `assignment_data1`
+
+```{r, eval = FALSE}
+assignment_data1 = assignment_data %>%
+  pivot_longer()
+```
+
+## recode
+Recode the values in `value` as follows:
+* 1 = "yes"
+* 2 = "no
+
+Assign this to `assignment_data2`
+
+```{r, eval = FALSE}
+assignment_data2 = assignment_data1 %>%
+  mutate()
+```
+
+## convert from long to wide format
+Use `pivot_wider()` to go from the long to the wide format. Here, we don't need to specify any arguments. Just use `%>% pivot_wider()`.
+
+Assign this to `assignment_data3`
+
+```{r, eval = FALSE}
+assignment_data3 = assignment_data2 %>%
+  pivot_wider()
+```
+
+## filter
+From `assignment_data3`, filter only people who reported being registered to vote (`vote_registered`).
+
+Assign this to `assignment_data4`.
+
+```{r, eval = FALSE}
+
+```
+
+## convert to numeric
+Convert `attitude_1` to numeric.
+
+Assign this to `assignment_data5`.
+
+```{r, eval = FALSE}
+
+```
+
+## combine steps
+Instead of doing each step separately and assigning them to new variables each time, use `%>%` to link the steps together.
+
+Assign this to `assignment_combined`
+
+```{r, eval = FALSE}
+
+```
+
+## summarize
+From `assignment_combined`, calculate the mean of `attitude_1` for yes and no responses to `behavior_mailin` separately using `group_by()` and `summarize()`.
+
+When using the `mean()` function, include `na.rm = TRUE` to ignore missing values.
+
+```{r, eval = FALSE}
+
+```
+
+This time, do the same thing but with `mutate()` instead of `summarize()`. What's different?
+
+```{r, eval = FALSE}
+
+```
+
