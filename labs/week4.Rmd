@@ -29,8 +29,8 @@ Here are a number of helpful resources to dig deeper into data wrangling and tid
 
 * [Introduction to the Tidyverse](https://uopsych-r-bootcamp-2020.netlify.app/post/04-intro-tidyverse/)
 * [Importing Data & Project-oriented Workflows](https://uopsych-r-bootcamp-2020.netlify.app/post/05-importing-workflows/)
-* [Data Wranging With {dplyr}](https://uopsych-r-bootcamp-2020.netlify.app/post/07-dplyr/)
-* [Data Wranging With {tidyr}](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+* [Data Wrangling With {dplyr}](https://uopsych-r-bootcamp-2020.netlify.app/post/07-dplyr/)
+* [Data Tidying With {tidyr}](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
 
 **Cheat sheets**
 
@@ -100,7 +100,7 @@ Rename the following columns using `rename()`:
 
 * ``pol_expr&contcreat_1`` -->  `political_expression_1`
 * ``pol_expr&contcreat_2`` -->  `political_expression_3`
-* ``pol_expr&contcreat_2`` -->  `political_expression_3`
+* ``pol_expr&contcreat_3`` -->  `political_expression_3`
 
 The `%>%` operator is called a pipe. You can think of it as meaning "and then". So, we're going to take the `data` variable **and then** rename three columns
 
@@ -159,6 +159,8 @@ data_recoded = data_filtered %>%
 
 # check unique response values again
 unique(data_recoded$CE_voting)
+
+mean(as.numeric(data_filtered$CE_voting), na.rm = TRUE)
 ```
 
 # select a subset of columns
@@ -207,7 +209,7 @@ Regular expressions are SUPER helpful for wrangling and tidying. Learn more abou
 ```{r}
 data_scale = data_long %>%
   # extract the item number from scale
-  extract(col = "scale_name", into = c("scale_name", "item"), regex = "(.*)_([0-9]+)") %>%
+  extract(col = "scale_name", into = c("scale_name", "item"), regex = "(CE_attitudes|CE_checklist)_([0-9]+)") %>%
   # reorder variables using `select()`
   select(ResponseId, behavior_voting, scale_name, item, value)
 
