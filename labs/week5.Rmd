@@ -236,7 +236,7 @@ data_tidy %>%
   ggplot(aes(x = summarized_value, fill = behavior_voting)) +
   geom_density(alpha = .5) +
   facet_grid(~scale_name, scale = "free") +
-  theme(legend.position = "top")
+  theme(legend.position = "bottom")
 ```
 
 ### color 
@@ -635,7 +635,7 @@ data_reasons %>%
   geom_text(aes(label = stat(count)), stat = "count", nudge_y = 10) +
   labs(x = "", y = "\ncount") +
   theme(legend.position = "bottom") +
-  scale_fill_brewer(palette = 1)
+  scale_fill_brewer(palette = 2)
 ```
 
 ### color

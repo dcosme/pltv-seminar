@@ -1,0 +1,536 @@
+---
+title: "Week 6: Quantitative analysis"
+author: "Dani Cosme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: show
+    highlight: tango
+    theme: united
+    toc: true
+    toc_float: 
+      collapsed: TRUE
+      smooth_scroll: TRUE
+    df_print: paged
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.path = "figs/week4/")
+
+options(scipen = 999)
+```
+
+# resources
+
+Here are a number of helpful resources to dig deeper into data visualization with `{ggplot}`:
+
+**UO boot camp modules**
+
+* [Data Wrangling with `{dplyr}`](https://uopsych-r-bootcamp-2020.netlify.app/post/07-dplyr/)
+
+**Stats resources**
+
+* [Quantitative Research Methods for Political Science, Public Policy and Public Administration for Undergraduates: 1st Edition With Applications in R](https://bookdown.org/wwwehde/qrm_textbook_updates/) by Wesley Wehde, Hank Jenkins-Smith, Joseph Ripberger, Gary Copeland, Matthew Nowlin, Tyler Hughes, Aaron Fister, and Josie Davis
+* [Learning statistics with R: A tutorial for psychology students and other beginners](https://learningstatisticswithr.com/lsr-0.6.pdf) by Danielle Navarro
+
+**Cheat sheets**
+
+* [Data transformation with dplyr](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+* [Data tidying tidyr/readr](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+* [Data visualization](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf)
+* [More useful cheat sheets!](https://www.rstudio.com/resources/cheatsheets/)
+
+# load packages
+
+```{r}
+if (!require(pacman)) {
+  install.packages("pacman")
+}
+pacman::p_load("tidyverse", "here", "sysfonts", install = TRUE)
+```
+
+# load the data file
+
+Modify the path as needed to where your `week4_data.csv` file is downloaded. Note, my path is a little different, but for you, it should be in the `data/` directory in the same folder as this script.
+
+Import the csv file and assign it to the variable `data`
+
+```{r}
+data = read_csv(here("static", "labs", "data", "week4_data.csv"))
+```
+
+# tidy the data using code from week 4
+In week 4, we did most of these steps independently. Here, we'll use `%>%` to thread the processes together without assigning any intermediate variables.
+
+The key variables we'll be working with today are as follows:
+
+* `behavior_voting`: voted in 2020; single dichotomous item, yes or no
+* `CE_attitudes`: civic engagement attitudes; 8-item scale with range 1-7
+* `CE_checklist`: checklist of civic engagement activities; 17 dichotomous items, yes or no
+* `pol_eff`: political efficacy scale; 4-item scale with range 1-4
+* `reasons_yes`: checklist of reasons why people voted in 2020
+
+```{r}
+data_tidy = data %>%
+  # filter out test and incomplete responses
+  filter(!DistributionChannel == "preview") %>%
+  filter(Finished == 1 & consent == 1) %>%
+  # select a subset of variables 
+  select(ResponseId, behavior_voting, reasons_yes,
+         starts_with("CE_attitudes"), contains("checklist"), contains("pol_eff")) %>%
+  # convert to long format
+  pivot_longer(cols = -c(ResponseId, behavior_voting, reasons_yes), names_to = "scale_name") %>%
+  # extract item number from scale_name
+  extract(col = "scale_name", into = c("scale_name", "item"),
+          regex = "(CE_attitudes|CE_checklist|pol_eff)_([0-9]+)") %>%
+  # convert responses to numeric and recode response values
+  mutate(value = as.numeric(value),
+         value = ifelse(test = scale_name == "CE_checklist" & value == 2,
+                        yes = 0,
+                        no = value),
+         behavior_voting = recode(behavior_voting,
+                                  "1" = "yes",
+                                  "2" = "no")) %>%
+  # calculate scale means or sums for each participant
+  group_by(ResponseId, scale_name) %>%
+  mutate(summarized_value = ifelse(test = scale_name == "CE_checklist", 
+                                   yes = sum(value, na.rm = TRUE),
+                                   no = mean(value, na.rm = TRUE))) %>%
+  # remove the item and value columns
+  select(-item, -value) %>%
+  # remove repeated observations (rows)
+  unique()
+
+```
+
+Let's check out what the tidied data look like
+```{r}
+data_tidy
+```
+
+# descriptive stats
+Descriptive stats describe different properties of the data. Here, we'll focus on the following properties:
+
+* Number of observations
+* Counts and percentages
+* Central tendencies (mean, median, mode)
+* Response ranges
+* Variance around the central tendency
+
+## number of observations
+Right now the data are in the long format. If we want to know the number of people who completed the survey, we have two options. 
+
+We can convert it to the wide format using `pivot_wider()` and `nrow`()` as follows:
+
+```{r}
+data_tidy %>%
+  pivot_wider(names_from = scale_name, values_from = summarized_value) %>%
+  nrow()
+```
+
+Or, we can use `summarize()` to count the number of observation for each `scale_name` variable with the `n()` to get the size of each group
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(n = n())
+```
+
+## counts
+Let's say we wanted to know the number of people who selected each reason for voting. We'll use code from week 5 to tidy the data to be in the long format using the following code
+
+```{r}
+reason_text = read_csv(here("static", "labs", "data", "week4_data_reasons.csv"))
+
+data_reasons = data_tidy %>%
+  # select relevant variables
+  ungroup() %>%
+  select(ResponseId, reasons_yes) %>%
+  # split the selected responses and convert to a single row per response
+  mutate(reasons_yes = strsplit(gsub("[][\"]", "", reasons_yes), ",")) %>%
+  unnest(reasons_yes) %>%
+  # convert to numeric to facilitate joining
+  mutate(reasons_yes = as.numeric(reasons_yes)) %>%
+  # join with text 
+  left_join(., reason_text, by = "reasons_yes") %>%
+  # remove missing responses and "other" responses
+  filter(!is.na(text) & !text == "Other") %>%
+  # get unique responses
+  unique()
+```
+
+Take a look at the data
+
+```{r}
+data_reasons
+```
+
+Next, we'll use similar code as above to group by the `text` column and calculate the group size (count) for each reason
+
+```{r}
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n())
+```
+
+Right now the output is in alphabetical order by the text column. Let's order by the count number using `arrange()`
+
+```{r}
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+```
+
+To change the order from ascending to descending, apply the `desc()` function to count
+
+```{r}
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+```
+
+## percentages
+Instead of counts, let's change this to be the percent of people who endorsed each reason.
+
+We'll do this by dividing the count by the total number of observations. We'll use the same code as before to get the number of observations, but this time save it as a variable we can use with `summarize()`
+
+```{r}
+n_observations = data_tidy %>%
+  pivot_wider(names_from = scale_name, values_from = summarized_value) %>%
+  nrow()
+
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n(),
+            percent = (count / n_observations) * 100)
+```
+
+If we want to remove the count column, we can do this with `select()`
+
+```{r}
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n(),
+            percent = (count / n_observations) * 100) %>%
+  select(-count)
+```
+
+To add a `%` after the value in the percent column, we can use `sprintf()` as follows
+
+```{r}
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n(),
+            percent = (count / n_observations) * 100) %>%
+  select(-count) %>%
+  mutate(percent = sprintf("%s%s", percent, "%"))
+```
+
+Way too many decimal points!
+
+Instead of using `%s`, we can specify the placeholder as a digit with 1 decimal point by using `%.1f`
+
+```{r}
+data_reasons %>%
+  group_by(text) %>%
+  summarize(count = n(),
+            percent = (count / n_observations) * 100) %>%
+  select(-count) %>%
+  mutate(percent = sprintf("%.1f%s", percent, "%"))
+```
+
+## central tendencies
+
+Next, turn back to our questionnaires in `data_tidy` and look at some statistics summarizing the average across participants for each scale
+
+First, let's look at the mean across participants
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(mean = mean(summarized_value, na.rm = TRUE))
+```
+
+Next, let's look at the median
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(median = median(summarized_value, na.rm = TRUE))
+```
+
+Finally, let's calculate the mode
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(mode = mode(summarized_value))
+```
+
+Hmm that's not what we want. Looks like we need to either write our own function to calculate that, or use a function that someone else has written and shared in a library. 
+
+We'll use the `Mode()` function from `{DescTools}` (thanks stackoverflow!)
+
+```{r}
+pacman::p_load("DescTools", install = TRUE)
+
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(mode = Mode(summarized_value))
+
+```
+
+To understand what each of these stats are telling us about the central tendency, let's plot the data.
+
+First, we'll save those summary stats in `central_tendencies` so that we can plot as a layer on top of the density plot we created in week 5. We need to have the same x-axis with the data in long format, so we'll use `pivot_longer()` to do that
+
+```{r}
+central_tendencies = data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(mean = mean(summarized_value, na.rm = TRUE),
+            median = median(summarized_value, na.rm = TRUE),
+            mode = Mode(summarized_value)) %>%
+  pivot_longer(cols = c(mean, median, mode),
+               names_to = "stat")
+  
+
+data_tidy %>%
+  ggplot(aes(x = summarized_value)) +
+  geom_density(aes(fill = scale_name), alpha = .5, show.legend = FALSE) +
+  geom_vline(data = central_tendencies, 
+             aes(xintercept = value,
+                 linetype = stat)) +
+  facet_grid(~scale_name, scales = "free") +
+  theme(legend.position = "top") 
+
+```
+
+## range
+Let's check the range of values for each scale using `range()`
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(range = range(summarized_value))
+```
+
+Let's add a column to specify the min and max values, and then pivot to the wider format
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(range = range(summarized_value)) %>%
+  bind_cols(value = rep(c("min", "max"), 3)) %>%
+  spread(value, range)
+```
+
+## variance
+Let's characterize the distribution around the mean of each scale by calculating the standard deviation
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(sd = sd(summarized_value, na.rm = TRUE))
+```
+
+# inferential stats
+
+We want to make inferences about the population and we do that by sampling from the population.
+
+This section of [Quantitative Research Methods for Political Science, Public Policy and Public Administration for Undergraduates: 1st Edition With Applications in R](https://bookdown.org/wwwehde/qrm_textbook_updates/inference.html) provides some helpful background since we don't have space to go into too much detail here.
+
+
+## sampling {.tabset}
+
+Let's do a little simulation to learn about how sample size affects the sampling distribution.
+
+We're going to sample (with different sample sizes) from a uniform distribution, so we know that the true mean of the population = 0.5.
+
+For each sample, we'll calculate the mean, and repeat this 10,000 times and look at the different distributions this creates. 
+
+### run simulation
+
+```{r}
+# set the parameters
+iter = 10000
+sample_size = c(2, 5, 10, 25, 50, 100, 200, 400)
+
+# create an empty matrix
+sample_means = matrix(NA, nrow=iter, ncol=length(sample_size))
+
+# run the simulation
+for (a in 1:length(sample_size)) {
+  b = sample_size[a]
+  for (i in 1:iter) {
+    sample = runif(b)
+  	sample_mean = mean(sample)
+  	sample_means[i,a] = sample_mean
+  }
+}
+```
+
+### plot means
+```{r}
+# reshape data to long format
+sample_means = as.data.frame(sample_means)
+names(sample_means) = as.character(paste("N =", sample_size))
+
+sample_means_long = sample_means %>%
+  pivot_longer(cols = everything()) %>%
+  extract(name, "order", "N = (.*)", remove = FALSE) %>%
+  mutate(order = as.numeric(order))
+
+# plot data
+ggplot(sample_means_long, aes(value)) + 
+  geom_histogram(binwidth = 1/100) + 
+  facet_wrap(~reorder(name, order)) +
+  scale_x_continuous(breaks = c(.25, .5, .75)) +
+  xlab("sample mean") + 
+  labs(title="Sampling Distirbution of Means With Various Sample Sizes")
+```
+
+We can see that we can recover the true mean (0.5) with each of the different sample sizes, but we have way more variability with small sample sizes, than with large ones.
+
+That means, that if we have a small sample size, we may observe a sampling mean that is very different than the mean (e.g. mean = .1 or .9) by chance and if we're not careful, we might draw the wrong conclusions about the population based on our sample.
+
+## precision and confidence intervals
+
+A confidence interval is a measure of uncertainty around the sampling mean. It gives us a range of values within which we can expect the means from repeated samples from the population to fall.
+
+Check out [this section of the book](https://bookdown.org/wwwehde/qrm_textbook_updates/inference.html#confidence-intervals) for more background on confidence intervals.
+
+Here's how to calculate a 95% confidence interval using the `{Rmisc}` package
+
+```{r}
+#install.packages("Rmisc")
+
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(value = Rmisc::CI(summarized_value, ci = .95)) %>%
+  bind_cols(stat = rep(c("upper", "mean", "lower"), 3)) %>%
+  spread(stat, value)
+```
+
+Let's plot the mean and confidence interval as a bar graph
+
+```{r}
+data_tidy %>%
+  group_by(scale_name) %>%
+  summarize(value = Rmisc::CI(summarized_value)) %>%
+  bind_cols(stat = rep(c("upper", "mean", "lower"), 3)) %>%
+  spread(stat, value) %>%
+  ggplot(aes(x = scale_name, y = mean)) +
+  geom_bar(stat = "identity") +
+  geom_linerange(aes(ymin = lower, ymax = upper))
+```
+
+We can also do this directly by using `stat_summary()` 
+
+```{r}
+data_tidy %>%
+  ggplot(aes(x = scale_name, summarized_value)) +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge") +
+  stat_summary(fun.data = "mean_cl_boot", geom = "errorbar", position = "dodge", width = 0) +
+  theme(legend.position = "top")
+```
+
+## differences between group means
+
+In week 5, we saw that the distributions for civic engagement attitudes looked like they might differ between folks who voted in the 2020 election and those who didn't.
+
+```{r}
+data_tidy %>%
+  ggplot(aes(x = summarized_value, fill = behavior_voting)) +
+  geom_density(alpha = .5, color = NA) +
+  facet_grid(~scale_name, scale = "free") +
+  theme(legend.position = "top")
+```
+
+Now, let's test whether the mean civic engagement attitudes differ by group. First, we'll plot the means and 95% CIs
+
+```{r}
+data_tidy %>%
+  filter(scale_name == "CE_attitudes") %>%
+  ggplot(aes(x = behavior_voting, summarized_value)) +
+  stat_summary(fun = "mean", geom = "bar", position = position_dodge(.9)) +
+  stat_summary(fun.data = "mean_cl_boot", geom = "errorbar", position = position_dodge(.9),
+               width = 0) +
+  theme(legend.position = "top")
+```
+
+Now, let's statistically test whether the difference between the means is different than 0 using a t-test.
+
+Here's the [relevant section in the book](https://bookdown.org/wwwehde/qrm_textbook_updates/inference.html#differences-between-groups) for more background about t-tests
+
+```{r}
+data_tidy %>%
+  filter(scale_name == "CE_attitudes") %>%
+  t.test(summarized_value ~ behavior_voting, data = .)
+```
+
+## associations between continuous variables
+
+Next, we'll look at how to test relationships between two continuous variables. Let's look at the relationship between civic engagement attitudes and behaviors. Do people who have strong attitudes also tend to engage in more civic behaviors?
+
+First, we'll plot the data using a scatterplot
+
+```{r}
+data_tidy %>%
+  spread(scale_name, summarized_value) %>%
+  ggplot(aes(x = CE_attitudes, y = CE_checklist)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme(legend.position = "top")
+```
+
+Now, we'll statistically test this relationship by calculating the strength of the correlation between the variables and testing whether that relationship is different than 0
+
+```{r}
+data_spread = data_tidy %>%
+  spread(scale_name, summarized_value)
+
+cor.test(data_spread$CE_attitudes, data_spread$CE_checklist)
+```
+
+# assignment
+
+Summarize the mean, median, mode, and number of observations for the three questionnaire scales
+
+```{r}
+
+```
+
+Plot the mean and 95% CIs for civic engagement behaviors as a function of voting behavior
+
+```{r}
+
+```
+
+Using a t-test, test whether mean civic engagement behavior statistically differ between people who voted and people who didn't vote 
+
+```{r}
+
+```
+
+Now, test whether mean political efficacy statistically differs between people who voted and people who didn't vote 
+
+```{r}
+
+```
+
+Using a scatterplot, visualize the relationship between civic engagement attitudes and political efficacy (`pol_eff`)
+
+```{r}
+
+```
+
+Test the correlation between civic engagement attitudes and political efficacy using the `data_spread` dataframe
+
+```{r}
+
+```
+

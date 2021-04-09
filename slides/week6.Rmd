@@ -1,0 +1,83 @@
+---
+title: "Week 6"
+subtitle: "Quantitative analysis"
+author: "Dani Cosme"
+output:
+  xaringan::moon_reader:
+    css: ["default", "css/dcos.css", "css/dcos-fonts.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: atelier-lakeside-light
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+  comment = NA, dpi = 300,
+  fig.align = "center", out.width = "80%", cache = FALSE)
+
+if(!require('tidyverse')) {
+	install.packages('tidyverse')
+}
+if(!require('devtools')) {
+	install.packages('devtools') 
+}
+if(!require('emo')) {
+	devtools::install_github("hadley/emo")
+}
+if(!require('xaringanExtra')) {
+	devtools::install_github("gadenbuie/xaringanExtra")
+}
+if(!require('countdown')) {
+	devtools::install_github("gadenbuie/countdown")
+}
+```
+
+## Check-in
+### Survey
+
+* Psych pool survey has been launched
+
+--
+
+* Next steps: send to PLTV mailing list and class forums
+
+--
+
+### Process
+
+* How is the current setup working for folks?
+
+---
+class: center, middle
+
+## Goal for this week
+
+Learn about quantitative analysis in R <br><br>
+
+---
+class: center, middle
+
+## Let's walk through the [week6.Rmd](../labs/week6.html) code together
+
+---
+## Assignment
+
+--
+
+1. Run through the code we walked through together on your own in the `week6.Rmd`
+
+--
+
+2. Apply what you've learned in the assignment section of the `week6.Rmd`
+
+--
+
+3. Post to Slack for collective troubleshooting
+
+--
+
+4. Use the `week6_key.Rmd` to check your solutions
+
