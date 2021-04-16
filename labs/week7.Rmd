@@ -1,0 +1,449 @@
+---
+title: "Week 7: Text analysis"
+author: "Dani Cosme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: show
+    highlight: tango
+    theme: united
+    toc: true
+    toc_float: 
+      collapsed: TRUE
+      smooth_scroll: TRUE
+    df_print: paged
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.path = "figs/week4/")
+
+options(scipen = 999)
+```
+
+# resources
+
+Here are a number of helpful resources to dig deeper into text processing and analysis:
+
+**Tutorials**
+
+* [UO data science seminar text processing](https://robchavez.github.io/datascience_gallery/html_only/text_processing.html)
+* [An Introduction to Text Processing and Analysis with R](https://m-clark.github.io/text-analysis-with-R/)
+* [Welcome to Text Mining with R](https://www.tidytextmining.com/index.html)
+
+**Cheat sheets**
+
+* [Strings](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf)
+* [Regular expressions](https://github.com/rstudio/cheatsheets/raw/master/regex.pdf)
+* [More useful cheat sheets!](https://www.rstudio.com/resources/cheatsheets/)
+
+# load packages
+
+```{r}
+if (!require(pacman)) {
+  install.packages("pacman")
+}
+pacman::p_load("tidyverse", "here", "tidytext", "ggwordcloud", "knitr", "reactable",
+               install = TRUE)
+```
+
+# load the data file
+
+Modify the path as needed to where your `week4_data.csv` file is downloaded. Note, my path is a little different, but for you, it should be in the `data/` directory in the same folder as this script.
+
+Import the csv file and assign it to the variable `data`
+
+```{r}
+data = read_csv(here("static", "labs", "data", "week4_data.csv"))
+```
+
+# tidy the data 
+
+The key variables we'll be working with today are as follows:
+
+* `behavior_voting`: voted in 2020; single dichotomous item, yes or no
+* `advantages`: open-ended question about the advantages of voting
+* `disadvantages`: open-ended question about the disadvantages of voting
+* `barriers`: open-ended question about the barriers of voting
+* `solutions`: open-ended question about the solutions of voting
+
+```{r}
+data_tidy = data %>%
+  # filter out test and incomplete responses
+  filter(!DistributionChannel == "preview") %>%
+  filter(Finished == 1 & consent == 1) %>%
+  # select a subset of variables 
+  select(ResponseId, behavior_voting, advantages, disadvantages, barriers, solutions) %>%
+  # convert responses to numeric and recode response values
+  mutate(behavior_voting = recode(behavior_voting,
+                                  "1" = "yes",
+                                  "2" = "no"))
+```
+
+Let's check out what the tidied data look like
+```{r}
+data_tidy
+```
+
+# make a table
+
+## basic table using knitr::kable()
+
+Let's make a table to present the raw text for the advantages and disadvantages questions
+
+```{r}
+data_tidy %>%
+  select(advantages, disadvantages) %>%
+  kable(format = "pandoc")
+```
+
+There is some weird formatting that breaks the columns in the table starting with the response that starts with "I can think of". Let's take a closer look and see what's doing on there
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  filter(grepl("^I can think of", value))
+```
+
+It looks like this person used the return key, coded here as `\n`. Let's replace this with `,` to try to fix the issue
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  mutate(value = gsub("\n", ", ", value)) %>%
+  filter(grepl("^I can think of", value))
+```
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  mutate(value = gsub("\n", ", ", value)) %>%
+  pivot_wider() %>%
+  select(-ResponseId) %>%
+  kable(format = "pandoc")
+```
+
+## fancy table using reactable::reactable()
+
+Let's make a fancier, interactive table using the [`{reactable}` package](https://glin.github.io/reactable/). 
+
+First, let's add stripes to more easily distinguish responses.
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  mutate(value = gsub("-", "", value),
+         value = gsub("\n", ", ", value)) %>%
+  pivot_wider() %>%
+  select(-ResponseId) %>%
+  reactable(striped = TRUE)
+```
+
+Next, let's make the text filterable
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  mutate(value = gsub("-", "", value),
+         value = gsub("\n", ", ", value)) %>%
+  pivot_wider() %>%
+  select(-ResponseId) %>%
+  reactable(striped = TRUE,
+            filterable = TRUE)
+```
+
+# generate word counts
+
+Let's get the number of times each word was used for advantages and disadvantages separately. 
+
+First, we need to convert the dataframe to the long format using `pivot_longer()`. Then, we'll use the `unnest_tokens()` function to extract each individual word as a separate row
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  select(-ResponseId)
+```
+
+Next, we'll use the `count()` function to count the number of times each word was used and do this separately for each question using `group_by()`
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  group_by(name) %>%
+  count(word, sort = TRUE)
+```
+
+This is a faster alternative to what we've been doing previously using `summarize()` and `arrange()`
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  group_by(name, word) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n))
+```
+
+Because we don't really care how many times words like "the" and "a" are used, we want to remove these from the dataframe. the `{tidytext}` package includes a handy dataframe of the most common "stop" words in English
+
+```{r}
+stop_words
+```
+
+To remove the stop words, we'll use the `anti_join()` function. Since we'll be using this data throughout the next sections, let's save this as a variable `counts`
+
+```{r}
+(counts = data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  group_by(name) %>%
+  count(word, sort = TRUE) %>%
+  anti_join(stop_words, by = "word"))
+```
+
+# generate a word cloud
+
+Now that we have word counts, let's make a word cloud using the [`{ggwordcloud}`](https://lepennec.github.io/ggwordcloud/index.html) package.
+
+To make it easier to interpret, let's filter out any word that only appears once. 
+
+We'll use the color aesthetic to separate the advantages and disadvantages words.
+
+```{r}
+counts %>%
+  filter(n > 1) %>%
+  ggplot(aes(label = word, size = n, color = name)) +
+  geom_text_wordcloud_area(rm_outside = TRUE)
+```
+
+This time, let's separate the advantages and disadvantages words into two separate panels with `facet_grid()`
+
+```{r}
+counts %>%
+  filter(n > 1) %>%
+  ggplot(aes(label = word, size = n, color = name)) +
+  geom_text_wordcloud_area(rm_outside = TRUE) +
+  facet_grid(~name)
+```
+
+To make the most common words pop a little more, let's change the max size
+
+```{r}
+counts %>%
+  filter(n > 1) %>%
+  ggplot(aes(label = word, size = n, color = name)) +
+  geom_text_wordcloud_area(rm_outside = TRUE) +
+  scale_size_area(max_size = 6) +
+  facet_grid(~name)
+```
+
+# plot word counts
+Next, let's plot the word counts for each question as a bar graph
+
+```{r}
+counts %>%
+  ggplot(aes(x = word, y = n, fill = name)) +
+  geom_bar(stat = "identity")
+```
+
+Let's reduce this down to 15 most common words per group
+
+```{r}
+advantages_15 = counts %>%
+  filter(name == "advantages") %>%
+  slice(1:15)
+
+disadvantages_15 = counts %>%
+  filter(name == "disadvantages") %>%
+  slice(1:15)
+
+bind_rows(advantages_15, disadvantages_15) %>%
+  ggplot(aes(x = word, y = n, fill = name)) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "top")
+```
+
+To make this easier to read, let's flip the x and y coordinates and use `position_dodge()` to separate the questions
+
+```{r}
+bind_rows(advantages_15, disadvantages_15) %>%
+  ggplot(aes(x = word, y = n, fill = name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  theme(legend.position = "top")
+```
+
+Since the questions have different words, let's instead use `facet_wrap` and `scales = "free` to create each question as a separate panel
+
+```{r}
+bind_rows(advantages_15, disadvantages_15) %>%
+  ggplot(aes(x = word, y = n, fill = name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  facet_wrap(~name, scales = "free") + 
+  theme(legend.position = "none")
+```
+
+Let's reorder the words by `n`
+
+```{r}
+bind_rows(advantages_15, disadvantages_15) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  facet_wrap(~name, scales = "free") + 
+  theme(legend.position = "none")
+```
+
+# sentiment
+
+Next looks at the positive and negative sentiment expressed in the text. To do this, we'll use the `get_sentiments` dataframe from the `{tidytext}` package and join the dataframes using `inner_join()` so that only rows with words that have a positive or negative sentiment remains
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  inner_join(get_sentiments(lexicon = c("bing", "afinn", "loughran", "nrc"))) %>%
+  select(-ResponseId)
+```
+
+Next, we'll get counts, but this time for the number of positive and negative words for each question separately
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  inner_join(get_sentiments(lexicon = c("bing", "afinn", "loughran", "nrc"))) %>%
+  group_by(name, sentiment) %>%
+  count(sort = TRUE)
+```
+
+Let's plot this as a bar graph
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  inner_join(get_sentiments(lexicon = c("bing", "afinn", "loughran", "nrc"))) %>%
+  group_by(name, sentiment) %>%
+  count(sort = TRUE) %>%
+  ggplot(aes(x = name, y = n, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(legend.position = "top")
+```
+
+Finally, let's see if this differs by people who did and didn't vote
+
+```{r}
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages, behavior_voting) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  inner_join(get_sentiments(lexicon = c("bing", "afinn", "loughran", "nrc"))) %>%
+  group_by(name, sentiment, behavior_voting) %>%
+  count(sort = TRUE) %>%
+  ggplot(aes(x = behavior_voting, y = n, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(~name) +
+  theme(legend.position = "top")
+```
+
+Since way more people voted than didn't vote (hooray!!), let's use percentages instead of count variables
+
+```{r}
+total_words = data_tidy %>%
+  select(ResponseId, advantages, disadvantages, behavior_voting) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  group_by(behavior_voting, name) %>%
+  count(sort = TRUE) %>%
+  rename("total_n" = n)
+
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages, behavior_voting) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  inner_join(get_sentiments(lexicon = c("bing", "afinn", "loughran", "nrc"))) %>%
+  group_by(name, sentiment, behavior_voting) %>%
+  count(sort = TRUE) %>%
+  left_join(., total_words) %>%
+  mutate(percent = (n / total_n) * 100) %>%
+  ggplot(aes(x = behavior_voting, y = percent, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(~name) +
+  theme(legend.position = "top")
+```
+
+# assignment
+
+Create a table using `reactable()` to present the responses to the barriers and solutions questions. Check out the [reactable documentation](https://glin.github.io/reactable/) and make it fancy
+
+```{r}
+
+```
+
+Generate word counts for the barriers and solutions questions and save these as `counts`
+
+```{r}
+
+```
+
+Create a dataframe called `top10` that contains the 10 most commonly used words for both the barriers and solutions questions
+
+```{r}
+
+```
+
+Modify the following code to plot the word counts as a bar graph with each question as a separate panel
+
+```{r}
+bind_rows(advantages_15, disadvantages_15) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  facet_wrap(~name, scales = "free") + 
+  theme(legend.position = "none")
+
+```
+
+Modify the following code to explore whether people who voted use more negative language when describing barriers and more positive language when describing solutions
+
+```{r}
+total_words = data_tidy %>%
+  select(ResponseId, advantages, disadvantages, behavior_voting) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  group_by(behavior_voting, name) %>%
+  count(sort = TRUE) %>%
+  rename("total_n" = n)
+
+data_tidy %>%
+  select(ResponseId, advantages, disadvantages, behavior_voting) %>%
+  pivot_longer(cols = c(advantages, disadvantages)) %>%
+  unnest_tokens(word, value) %>%
+  inner_join(get_sentiments(lexicon = c("bing", "afinn", "loughran", "nrc"))) %>%
+  group_by(name, sentiment, behavior_voting) %>%
+  count(sort = TRUE) %>%
+  left_join(., total_words) %>%
+  mutate(percent = (n / total_n) * 100) %>%
+  ggplot(aes(x = behavior_voting, y = percent, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(~name) +
+  theme(legend.position = "top")
+```
+

@@ -1,0 +1,76 @@
+---
+title: "Week 7"
+subtitle: "Text analysis"
+author: "Dani Cosme"
+output:
+  xaringan::moon_reader:
+    css: ["default", "css/dcos.css", "css/dcos-fonts.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: atelier-lakeside-light
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+  comment = NA, dpi = 300,
+  fig.align = "center", out.width = "80%", cache = FALSE)
+
+if(!require('tidyverse')) {
+	install.packages('tidyverse')
+}
+if(!require('devtools')) {
+	install.packages('devtools') 
+}
+if(!require('emo')) {
+	devtools::install_github("hadley/emo")
+}
+if(!require('xaringanExtra')) {
+	devtools::install_github("gadenbuie/xaringanExtra")
+}
+if(!require('countdown')) {
+	devtools::install_github("gadenbuie/countdown")
+}
+```
+
+## Check-in
+
+* Survey status
+
+--
+
+* Plan for the final week
+
+---
+class: center, middle
+
+## Goal for this week
+
+Learn about text analysis in R <br><br>
+
+---
+class: center, middle
+
+## Let's walk through the [week7.Rmd](../labs/week7.html) code together
+
+---
+## Assignment
+
+--
+
+1. Run through the code we walked through together on your own in the `week7.Rmd`
+
+--
+
+2. Apply what you've learned in the assignment section of the `week7.Rmd`
+
+--
+
+3. Post to Slack for collective troubleshooting
+
+--
+
+4. Use the `week7_key.Rmd` to check your solutions
+

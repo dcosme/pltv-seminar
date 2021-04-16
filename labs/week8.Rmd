@@ -1,0 +1,71 @@
+---
+title: "Week 8: Summary, Synthesis, & Interpretation"
+author: "Dani Cosme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: show
+    highlight: tango
+    theme: united
+    toc: true
+    toc_float: 
+      collapsed: TRUE
+      smooth_scroll: TRUE
+    df_print: paged
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.path = "figs/week4/")
+
+options(scipen = 999)
+```
+
+# resources
+
+# load packages
+
+```{r}
+if (!require(pacman)) {
+  install.packages("pacman")
+}
+pacman::p_load("tidyverse", "here", "tidytext", "ggwordcloud", "knitr", "reactable",
+               install = TRUE)
+```
+
+# load the survey data file
+
+Import the csv file and assign it to the variable `data`
+
+```{r}
+data_sona = read_csv(here("static", "labs", "data", "survey_data_sona.csv"))
+data_nonsona = read_csv(here("static", "labs", "data", "survey_data_nonsona.csv"))
+merged = bind_rows(data_sona, data_nonsona)
+```
+
+# tidy the survey data
+
+```{r}
+data_tidy = merged %>%
+  # filter out test and incomplete responses
+  filter(!DistributionChannel == "preview") %>%
+  filter(Finished == 1 & consent == 1 & !source == "" & is.na(eligible)) %>%
+  # pivot to long format
+  pivot_longer(cols = -c(ResponseId, source))
+
+messages = data_tidy %>%
+  
+```
+
+# who is our sample?
+College/year/demographics/source
+
+# variables descriptives
+
+# message framing experiment {.tabset}
+## message-level items
+
+## person-level items
+
+

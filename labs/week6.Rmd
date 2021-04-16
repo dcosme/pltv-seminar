@@ -13,7 +13,7 @@ output:
       smooth_scroll: TRUE
     df_print: paged
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -24,7 +24,7 @@ options(scipen = 999)
 
 # resources
 
-Here are a number of helpful resources to dig deeper into data visualization with `{ggplot}`:
+Here are a number of helpful resources to dig deeper into quantitative analysis:
 
 **UO boot camp modules**
 
@@ -301,7 +301,7 @@ central_tendencies = data_tidy %>%
 data_tidy %>%
   ggplot(aes(x = summarized_value)) +
   geom_density(aes(fill = scale_name), alpha = .5, show.legend = FALSE) +
-  geom_vline(data = central_tendencies, 
+  geom_vline(data = central_tendencies,
              aes(xintercept = value,
                  linetype = stat)) +
   facet_grid(~scale_name, scales = "free") +
@@ -316,6 +316,8 @@ Let's check the range of values for each scale using `range()`
 data_tidy %>%
   group_by(scale_name) %>%
   summarize(range = range(summarized_value))
+
+range(data_tidy$summarized_value)
 ```
 
 Let's add a column to specify the min and max values, and then pivot to the wider format
