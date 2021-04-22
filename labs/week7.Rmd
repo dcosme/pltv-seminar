@@ -363,6 +363,12 @@ data_tidy %>%
   theme(legend.position = "top")
 ```
 
+```{r}
+data_tidy %>%
+  group_by(behavior_voting) %>%
+  summarize(n = n())
+```
+
 Since way more people voted than didn't vote (hooray!!), let's use percentages instead of count variables
 
 ```{r}
