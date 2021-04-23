@@ -1,0 +1,85 @@
+---
+title: "Week 8"
+subtitle: "Summary, Synthesis, & Interpretation"
+author: "Dani Cosme"
+output:
+  xaringan::moon_reader:
+    css: ["default", "css/dcos.css", "css/dcos-fonts.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: atelier-lakeside-light
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+  comment = NA, dpi = 300,
+  fig.align = "center", out.width = "80%", cache = FALSE)
+
+if(!require('tidyverse')) {
+	install.packages('tidyverse')
+}
+if(!require('devtools')) {
+	install.packages('devtools') 
+}
+if(!require('emo')) {
+	devtools::install_github("hadley/emo")
+}
+if(!require('xaringanExtra')) {
+	devtools::install_github("gadenbuie/xaringanExtra")
+}
+if(!require('countdown')) {
+	devtools::install_github("gadenbuie/countdown")
+}
+```
+
+class: center, middle
+
+## Goal for this week
+
+Interpret the results from the survey <br><br>
+
+---
+class: center, middle
+
+## Let's walk through the [survey results](../labs/week8.html) together
+
+---
+## Discussion questions
+
+* Do we see evidence of successful experimental manipulation?
+
+--
+
+* Were the experimental messages more effective than the control messages? If so, for which outcomes?
+
+--
+
+* What do you notice about the distributions of the responses? How does summarizing group means obscure it?
+
+--
+
+* Does the effectiveness of the experimental manipulation differ by Penn identity strength or class year?
+
+--
+
+* Which messages were the most effective overall? Why do you think?
+
+--
+
+* To whom can we reasonably generalize these result to?
+
+--
+
+* What do these results suggest about who PLTV should target and how we should frame messages moving forward?
+
+---
+class: center, middle
+## How can we improve?
+
+Let's work through this [feedback activity](https://jamboard.google.com/d/1HONjFOskPOu-twesRfIk1TsCHZshTNtgb_PLXHcXxXY/edit?usp=sharing) together
+
+
+
