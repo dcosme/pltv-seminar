@@ -18,7 +18,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE,
   comment = NA, dpi = 300,
   fig.align = "center", out.width = "80%", cache = FALSE)
 
-if(!require('tidyverse')) {
+if(!require('tidyverse')) { 
 	install.packages('tidyverse')
 }
 if(!require('devtools')) {
@@ -39,7 +39,7 @@ class: center, middle
 
 ## Goal for this week
 
-Interpret the results from the survey <br><br>
+Talk about making reports with Rmarkdown and interpret the results from the survey <br><br>
 
 ---
 class: center, middle

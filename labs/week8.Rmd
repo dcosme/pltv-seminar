@@ -59,7 +59,7 @@ item_text = merged %>%
                        no = text),
          text = gsub("\n", "", text),
          text = gsub(".*In your opinion, what", "In your opinion, what", text)) %>%
-  select(-value)
+  select(-value) 
 
 # tidy the survey data
 data_tidy = merged %>%
@@ -69,7 +69,7 @@ data_tidy = merged %>%
   pivot_longer(cols = -c(ResponseId, source, group)) %>%
   # join with item text
   left_join(., item_text) %>%
-  # reverse coding
+  # reverse and re-coding
   mutate(value = ifelse(name %in% c("identity_3"),
                         yes = 100 - as.numeric(value),
                         no = value),
