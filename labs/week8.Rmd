@@ -26,7 +26,7 @@ options(scipen = 999)
 ```{r}
 # load packages
 if (!require(pacman)) {
-  install.packages("pacman")
+  install.packages("pacman") 
 }
 pacman::p_load("tidyverse", "here", "tidytext", "ggwordcloud", "knitr", "reactable",
                install = TRUE)
@@ -902,20 +902,21 @@ messages %>%
 ```
 
 ## class year {.tabset}
-Here, we'll see whether the effect of message framing condition differed as a function of class year.
+Here, we'll see whether the effect of message framing condition differed as a function of class year. Because only two people were year 5 or higher, let's exclude those participants to reduce their outsized effect.
 
 ```{r}
 year = data_tidy %>%
   filter(grepl("grade", name)) %>%
   mutate(value = as.numeric(value)) %>%
   rename("year" = value) %>%
-  select(ResponseId, year)
+  select(ResponseId, year) %>%
+  filter(!year == "5")
 ```
 
 ### relevance {.tabset}
 Does the effect of message condition on perceived message relevance differ by class year?
 
-#### median split
+#### by year
 ```{r, fig.width=13}
 messages %>%
   filter(grepl("relevance", name)) %>%
