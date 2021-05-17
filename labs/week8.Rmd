@@ -348,24 +348,52 @@ messages %>%
 ```
 
 #### statistics {.tabset}
+```{r}
+stats_mlm = function(data) {
+  lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = data) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental") %>%
+  mutate(`difference [95% CI]` = sprintf("%.2f [%.2f, %.2f]", estimate, conf.low, conf.high)) %>%
+  select(`difference [95% CI]`, p.value) %>%
+  kable(format = "pandoc", digits = 3)
+}
+
+stats_mlm_mod = function(data, moderator) {
+  lmerTest::lmer(value ~ group * get(moderator) + (1 | ResponseId),
+                       data = data) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(grepl("group|get", term)) %>%
+  mutate(term  = gsub("groupexperimental", "condition", term),
+         term  = gsub("get\\(moderator\\)", "moderator", term),
+         term  = gsub(":", " x ", term),
+         `estimate [95% CI]` = sprintf("%.2f [%.2f, %.2f]", estimate, conf.low, conf.high)) %>%
+  select(term, `estimate [95% CI]`, p.value) %>%
+  kable(format = "pandoc", digits = 3)
+}
+
+stats_lm = function(data) {
+  lm(value ~ group, data = data) %>%
+  broom::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental") %>%
+  mutate(`difference [95% CI]` = sprintf("%.2f [%.2f, %.2f]", estimate, conf.low, conf.high)) %>%
+  select(`difference [95% CI]`, p.value) %>%
+  kable(format = "pandoc", digits = 3)
+}
+```
+
 ##### norms
-The difference between the experimental and control groups is statistically unlikely to be due simply to chance. 
+The difference between the experimental and control groups is statistically unlikely to be due to chance. 
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("check norms", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("check norms", name)))
 ```
 
 ##### identity
-The difference between the experimental and control groups is statistically unlikely to be due simply to chance. 
+The difference between the experimental and control groups is statistically unlikely to be due to chance. 
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("check identity", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("check identity", name)))
 ```
 
 ### relevance {.tabset}
@@ -407,23 +435,17 @@ messages %>%
 
 #### statistics {.tabset}
 ##### self-relevance
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("relevance self", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("relevance self", name)))
 ```
 
 ##### relevance to others
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("relevance others", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("relevance others", name)))
 ```
 
 ### motivation {.tabset}
@@ -465,23 +487,17 @@ messages %>%
 
 #### statistics {.tabset}
 ##### motivation to vote: self
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("motivation self", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("motivation self", name)))
 ```
 
 ##### motivation to vote: others
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("motivation others", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("motivation others", name)))
 ```
 
 ### sharing {.tabset}
@@ -523,23 +539,17 @@ messages %>%
 
 #### statistics {.tabset}
 ##### broadcast
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("broadcast", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("broadcast", name)))
 ```
 
 ##### relevance to others
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
-lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = filter(messages, grepl("narrowcast", name))) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+stats_mlm(data = filter(messages, grepl("narrowcast", name)))
 ```
 
 <br><br>
@@ -587,17 +597,15 @@ data_tidy %>%
 ```
 
 #### statistics {.tabset}
-The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
 
 ```{r}
 data_tidy %>%
   filter(grepl("identity", name)) %>%
   mutate(value = as.numeric(value)) %>%
-  lmerTest::lmer(value ~ group + (1 | ResponseId),
-                       data = .) %>%
-  broom.mixed::tidy(., conf.int = TRUE) %>%
-  filter(term == "groupexperimental")
+  stats_mlm(data = .)
 ```
+
 ### social norms {.tabset}
 
 These items measure perceived social norms about voting for different groups at Penn.
@@ -634,6 +642,37 @@ data_tidy %>%
   theme(legend.position = "top")
 ```
 
+#### statistics {.tabset}
+##### community
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("norms community", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
+##### friends
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("norms friends", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
+##### students
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("norms students", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
 ### engagement {.tabset}
 
 These items measure perceived civic engagement for Penn students and the Penn community.
@@ -668,6 +707,27 @@ data_tidy %>%
   labs(x = "") +
   plot_aes +
   theme(legend.position = "top")
+```
+
+#### statistics {.tabset}
+##### community
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("engagement community", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
+##### students
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("engagement students", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
 ```
 
 ### social belonging {.tabset}
@@ -709,6 +769,16 @@ data_tidy %>%
   theme(legend.position = "none")
 ```
 
+#### statistics {.tabset}
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("belonging_", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_mlm(data = .)
+```
+
 ### civic engagement attitudes {.tabset}
 These items measure general civic engagement attitudes.
 
@@ -744,6 +814,16 @@ data_tidy %>%
   labs(x = "") +
   plot_aes +
   theme(legend.position = "none")
+```
+
+#### statistics {.tabset}
+The difference between the experimental and control groups is statistically unlikely to be due to chance. Therefore, we can say that the experimental group reported lower civic engagement attitudes than the control group.
+
+```{r}
+data_tidy %>%
+  filter(grepl("CE_attitude", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_mlm(data = .)
 ```
 
 ### voting attitudes {.tabset}
@@ -786,6 +866,16 @@ data_tidy %>%
   theme(legend.position = "none")
 ```
 
+#### statistics {.tabset}
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("^attitude", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_mlm(data = .)
+```
+
 ### voting intentions {.tabset}
 These items measure voting-related intentions in 2021 elections. Only participants who reported being eligible to vote in an election (N = `r nrow(data_tidy %>% filter(grepl("election_2021", name) & !grepl("no", value)))`) responded to these items.
 
@@ -820,6 +910,47 @@ data_tidy %>%
   labs(x = "") +
   plot_aes +
   theme(legend.position = "none")
+```
+
+#### statistics {.tabset}
+##### intention to register to vote
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("intention register", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
+##### intention to request ballow
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("intention request", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
+##### intention to vote
+The difference between the experimental and control groups is statistically likely to be due to chance. So, even though exposure to the experimental messages was associated with higher intentions to vote, the difference might just be noise.
+
+```{r}
+data_tidy %>%
+  filter(grepl("intention vote", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
+```
+
+##### intention to make a plan
+The difference between the experimental and control groups is statistically likely to be due to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("plan", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_lm(data = .)
 ```
 
 ### voting efficacy {.tabset}
@@ -859,6 +990,16 @@ data_tidy %>%
   labs(x = "") +
   plot_aes +
   theme(legend.position = "none")
+```
+
+#### statistics {.tabset}
+The difference between the experimental and control groups is statistically likely to be due to chance. So, even though exposure to the experimental messages was associated with higher perceived efficacy to vote, the difference might just be noise.
+
+```{r}
+data_tidy %>%
+  filter(grepl("PBC", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  stats_mlm(data = .)
 ```
 
 # moderation {.tabset}
@@ -919,6 +1060,33 @@ messages %>%
   plot_aes
 ```
 
+#### statistics {.tabset}
+##### self-relevance
+* `condition` = The groups don't differ statistically in their ratings of message self-relevance
+* `moderator` = Stronger Penn identity is associated higher message self-relevance
+* `condition x moderator` = People with stronger identities rated the experimental messages as less relevant than the control messages, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("relevance self", name)) %>%
+  left_join(., identity) %>%
+  filter(!is.na(identity)) %>%
+  stats_mlm_mod(data = ., moderator = "identity")
+```
+
+##### relevance to others
+* `condition` = The groups don't differ statistically in their ratings of message relevance to others
+* `moderator` = Stronger Penn identity is associated higher message relevance to others
+* `condition x moderator` = People with stronger identities rated the experimental messages as less relevant to others than the control messages, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("relevance others", name)) %>%
+  left_join(., identity) %>%
+  filter(!is.na(identity)) %>%
+  stats_mlm_mod(data = ., moderator = "identity")
+```
+
 ### motivation {.tabset}
 Do people who have weaker/stronger Penn identities perceive the messages as more motivating when they're in the experimental versus control group?
 
@@ -958,6 +1126,33 @@ messages %>%
   plot_aes
 ```
 
+#### statistics {.tabset}
+##### motivation to self
+* `condition` = The groups don't differ statistically in their ratings of how motivating the messages were to themselves
+* `moderator` = Stronger Penn identity is associated higher message motivation to themselves
+* `condition x moderator` = The relationship between identity and motivation didn't differ depending on which type of messages participants were exposed to
+
+```{r}
+messages %>%
+  filter(grepl("motivation self", name)) %>%
+  left_join(., identity) %>%
+  filter(!is.na(identity)) %>%
+  stats_mlm_mod(data = ., moderator = "identity")
+```
+
+##### motivation to others
+* `condition` = Exposure to the experimental messages was associated with lower ratings of motivation to others, but the difference is likely due to chance
+* `moderator` = Stronger Penn identity wasn't associated with perceived motivation to others
+* `condition x moderator` = People with stronger Penn identities tended to rate the messages as more motivating to others when in the experimental condition, but this relationship is likely due to chance
+
+```{r}
+messages %>%
+  filter(grepl("motivation others", name)) %>%
+  left_join(., identity) %>%
+  filter(!is.na(identity)) %>%
+  stats_mlm_mod(data = ., moderator = "identity")
+```
+
 ### sharing {.tabset}
 Do people who have weaker/stronger Penn identities have higher sharing intentions when they're in the experimental versus control group?
 
@@ -995,6 +1190,33 @@ messages %>%
   scale_color_manual(values = palette) + 
   scale_fill_manual(values = palette) + 
   plot_aes
+```
+
+#### statistics {.tabset}
+##### broadcasting
+* `condition` = The groups don't differ statistically in the intentions to share on social media
+* `moderator` = Stronger Penn identity is associated higher intentions to share on social media, but this association is may be due to chance
+* `condition x moderator` = The relationship between identity and sharing intentions didn't differ depending on which type of messages participants were exposed to
+
+```{r}
+messages %>%
+  filter(grepl("broadcast", name)) %>%
+  left_join(., identity) %>%
+  filter(!is.na(identity)) %>%
+  stats_mlm_mod(data = ., moderator = "identity")
+```
+
+##### narrowcasting
+* `condition` = Participants in the experimental group reported higher intentions to share the messages directly with someone, but this difference is likely due to chance
+* `moderator` = Stronger Penn identity is associated higher intentions to share on directly with someone
+* `condition x moderator` = People with strong Penn identities in the experimental condition reported lower intentions to share the messages than people with strong identities in the control condition, but this difference is likely due to chance
+
+```{r}
+messages %>%
+  filter(grepl("narrowcast", name)) %>%
+  left_join(., identity) %>%
+  filter(!is.na(identity)) %>%
+  stats_mlm_mod(data = ., moderator = "identity")
 ```
 
 ## class year {.tabset}
@@ -1049,6 +1271,34 @@ messages %>%
   plot_aes
 ```
 
+#### statistics {.tabset}
+##### self-relevance
+* `condition` = The groups don't differ statistically in their ratings of message self-relevance
+* `moderator` = Class year isn't associated with higher message self-relevance
+* `condition x moderator` = More advanced students rated the experimental messages as less relevant than the control messages, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("relevance self", name)) %>%
+  left_join(., year) %>%
+  filter(!is.na(year)) %>%
+  stats_mlm_mod(data = ., moderator = "year")
+```
+
+##### relevance to others
+* `condition` = The groups don't differ statistically in their ratings of perceived relevance to others
+* `moderator` = Class year isn't associated with higher perceived relevance to others
+* `condition x moderator` = More advanced students rated the experimental messages as less relevant to others than the control messages, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("relevance others", name)) %>%
+  left_join(., year) %>%
+  filter(!is.na(year)) %>%
+  stats_mlm_mod(data = ., moderator = "year")
+```
+
+
 ### motivation {.tabset}
 Does the effect of message condition on perceived message motivation differ by class year?
 
@@ -1089,6 +1339,33 @@ messages %>%
   plot_aes
 ```
 
+#### statistics {.tabset}
+##### motivation to self
+* `condition` = The groups don't differ statistically in their ratings of message motivation 
+* `moderator` = Class year isn't associated with higher message motivation 
+* `condition x moderator` = More advanced students rated the experimental messages as less motivating than the control messages, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("motivation self", name)) %>%
+  left_join(., year) %>%
+  filter(!is.na(year)) %>%
+  stats_mlm_mod(data = ., moderator = "year")
+```
+
+##### motivation to others
+* `condition` = The groups don't differ statistically in their ratings of perceived motivation to others
+* `moderator` = Class year isn't associated with higher perceived motivation to others
+* `condition x moderator` = More advanced students rated the experimental messages as less motivating to others than the control messages, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("motivation others", name)) %>%
+  left_join(., year) %>%
+  filter(!is.na(year)) %>%
+  stats_mlm_mod(data = ., moderator = "year")
+```
+
 ### sharing {.tabset}
 Does the effect of message condition on message sharing intentions differ by class year?
 
@@ -1127,6 +1404,33 @@ messages %>%
   scale_color_manual(values = palette) + 
   scale_fill_manual(values = palette) + 
   plot_aes
+```
+
+#### statistics {.tabset}
+##### broadcasting
+* `condition` = The groups don't differ statistically in the intentions to share on social media
+* `moderator` = Class year isn't associated with intentions to share on social media
+* `condition x moderator` = More advanced students exposed to experimental messages reported lower sharing intentions than advanced students in the control condition, but this difference is likely just due to chance
+
+```{r}
+messages %>%
+  filter(grepl("broadcast", name)) %>%
+  left_join(., year) %>%
+  filter(!is.na(year)) %>%
+  stats_mlm_mod(data = ., moderator = "year")
+```
+
+##### narrowcasting
+* `condition` = The groups don't differ statistically in the intentions to share directly with someone
+* `moderator` = Class year isn't associated with intentions to share directly with someone
+* `condition x moderator` = The relationship between condition and sharing intentions didn't fiffer by class year
+
+```{r}
+messages %>%
+  filter(grepl("narrowcast", name)) %>%
+  left_join(., year) %>%
+  filter(!is.na(year)) %>%
+  stats_mlm_mod(data = ., moderator = "year")
 ```
 
 # message effectiveness {.tabset}
