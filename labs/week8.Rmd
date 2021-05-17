@@ -28,7 +28,7 @@ options(scipen = 999)
 if (!require(pacman)) {
   install.packages("pacman") 
 }
-pacman::p_load("tidyverse", "here", "tidytext", "ggwordcloud", "knitr", "reactable",
+pacman::p_load("tidyverse", "here", "tidytext", "ggwordcloud", "knitr", "reactable", "lmerTest",
                install = TRUE)
 # set aesthetics
 palette = c("#b8b3be", "#357c92")
@@ -347,6 +347,27 @@ messages %>%
   theme(legend.position = "top")
 ```
 
+#### statistics {.tabset}
+##### norms
+The difference between the experimental and control groups is statistically unlikely to be due simply to chance. 
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("check norms", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
+
+##### identity
+The difference between the experimental and control groups is statistically unlikely to be due simply to chance. 
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("check identity", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
+
 ### relevance {.tabset}
 
 The next items measure how self and socially relevant participants found the messages.
@@ -382,6 +403,27 @@ messages %>%
   scale_fill_manual(values = palette) + 
   plot_aes +
   theme(legend.position = "top")
+```
+
+#### statistics {.tabset}
+##### self-relevance
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("relevance self", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
+
+##### relevance to others
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("relevance others", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
 ```
 
 ### motivation {.tabset}
@@ -421,6 +463,27 @@ messages %>%
   theme(legend.position = "top")
 ```
 
+#### statistics {.tabset}
+##### motivation to vote: self
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("motivation self", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
+
+##### motivation to vote: others
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("motivation others", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
+
 ### sharing {.tabset}
 
 The items measure intentions to share the message on social media (broadcast sharing) or directly with a friend (narrowcast sharing)
@@ -456,6 +519,27 @@ messages %>%
   labs(x = "") +
   plot_aes +
   theme(legend.position = "top")
+```
+
+#### statistics {.tabset}
+##### broadcast
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("broadcast", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
+
+##### relevance to others
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = filter(messages, grepl("narrowcast", name))) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
 ```
 
 <br><br>
@@ -502,6 +586,18 @@ data_tidy %>%
   theme(legend.position = "none")
 ```
 
+#### statistics {.tabset}
+The difference between the experimental and control groups is statistically likely to be due simply to chance. As such, we can say that the groups probably don't differ from each other.
+
+```{r}
+data_tidy %>%
+  filter(grepl("identity", name)) %>%
+  mutate(value = as.numeric(value)) %>%
+  lmerTest::lmer(value ~ group + (1 | ResponseId),
+                       data = .) %>%
+  broom.mixed::tidy(., conf.int = TRUE) %>%
+  filter(term == "groupexperimental")
+```
 ### social norms {.tabset}
 
 These items measure perceived social norms about voting for different groups at Penn.
