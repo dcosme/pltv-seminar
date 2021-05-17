@@ -61,29 +61,16 @@ data_sum = read.csv("data/newsletter_data.csv", stringsAsFactors = FALSE) %>%
 
 `voting_links` = Clicked on one or more links related to voting behavior
 
-* Confirm registration
-* Register to vote
 * Request a ballot
 * Print request form
-* Send request form
-* Home state voting
-* Voting in person
-* Polling place information
-* Voter ID information
-* Sample ballots
-* Dropbox locations
+* Request envelope
+* Check calendar
 
-`info_links` = Clicked on one or more links to get more information
+`info_involvement_links` = Clicked on one or more links to get more information
 
 * Pennvotes.org
 * Join the PLTV mailing list
-
-`invovement_links` = Clicked on one or more links to get involved
-
-* Volunteer
 * Join motivote
-* Office hours
-* Become a poll worker
 
 
 # summarize the data {.tabset}
@@ -166,7 +153,7 @@ data_sum %>%
 
 # stats {.tabset}
 
-For all of these models, the differences between the control messages and the experimental messages are not statistically significant. There is some evidence that the control messages had higher click rates, but because these differences are so small, they probably just due to chance.
+For all of these models, the differences between the control messages and the experimental messages are not statistically significant, meaning that any observed differences are likely due to chance.
 
 ```{r}
 fit_mod = function(df) {
